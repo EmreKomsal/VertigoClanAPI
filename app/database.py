@@ -5,7 +5,7 @@ import os
 
 # Database configuration
 # You can set the DATABASE_URL environment variable to your database connection string
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/clandb")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@34.32.45.114:5432/clandb")
 
 
 # Create the SQLAlchemy engine and session
