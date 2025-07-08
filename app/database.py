@@ -5,7 +5,7 @@ import os
 
 # Database configuration
 # You can set the DATABASE_URL environment variable to your database connection string
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:<your-password>@/cloudsql/vertigo-clan-api:europe-west10:clan-db/clandb")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:postgres@localhost/clandb")
 
 
 # Create the SQLAlchemy engine and session
