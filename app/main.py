@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Query
+from typing import Optional
 from sqlalchemy.orm import Session
 from . import models, schemas, crud
 from .database import engine, SessionLocal
@@ -25,9 +26,23 @@ def create_clan(clan: schemas.ClanCreate, db: Session = Depends(get_db)):
 
 # List all clans
 @app.get("/clans", response_model=list[schemas.ClanResponse])
-def list_clans(db: Session = Depends(get_db)):
-    """Return all clans in the database."""
-    return crud.get_all_clans(db)
+def list_clans(
+    region: Optional[str] = Query(None),
+    sort: Optional[str] = Query(None, regex="^(asc|desc)$"),
+    db: Session = Depends(get_db)
+):
+    """Return all clans in the database. with optional filtering and sorting."""
+    query = db.query(models.Clan)
+
+    if region:
+        query = query.filter(models.Clan.region == region)
+
+    if sort == "asc":
+        query = query.order_by(models.Clan.created_at.asc())
+    elif sort == "desc":
+        query = query.order_by(models.Clan.created_at.desc())
+
+    return query.all()
 
 # Get clan by ID
 @app.get("/clans/{clan_id}", response_model=schemas.ClanResponse)
@@ -37,6 +52,19 @@ def get_clan(clan_id: str, db: Session = Depends(get_db)):
     if not clan:
         raise HTTPException(status_code=404, detail="Clan not found")
     return clan
+
+# DELETE clan by ID
+@app.delete("/clans/{clan_id}")
+def delete_clan(clan_id: str, db: Session = Depends(get_db)):
+    """Delete a clan by its ID."""
+    clan = db.query(models.Clan).filter(models.Clan.id == clan_id).first()
+    if not clan:
+        raise HTTPException(status_code=404, detail="Clan not found")
+    db.delete(clan)
+    db.commit()
+    return {"message": "Clan deleted successfully."}
+
+#TEST SCRIPTS FOR UPLOADING AND EXPORTING CSV
 
 # Upload CSV to create clans
 @app.post("/upload_csv")
